@@ -1,7 +1,7 @@
 #loading packages
 
 library(dplyr)
-
+library(reshape2)
 
 #downloading and loading the dataset
 
@@ -61,8 +61,22 @@ Y_merged2 <- merge(Y_merged, labels, by="V1", all.x=T)
 
 #adding subject ids and activities to the DF
 
-X_merged3 <- cbind(subjects,Y_merged2[,2],X_merged2)
+X_merged3 <- cbind(subjects,Y_merged2$activity_name,X_merged2)
 head(X_merged3)
+names(X_merged3)[2] <- "Activity_name"
+
+# creating tidy dataset
+
+
+id_labels  <-  c("Id", "Activity_name")
+data_labels  <- setdiff(colnames(X_merged3), id_labels)
+X_merged4 <- melt(X_merged3, id = id_labels, measure.vars = data_labels)
+
+tidy_data  <-  dcast(X_merged4, Id + Activity_name ~ variable, mean)
+
+#export data
+write.table(tidy_data, file = "./tidy_data.txt", row.name=F)
+
 
 
 
